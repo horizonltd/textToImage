@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Image Generator</title>
+</head>
+<body>
+    <h2>Text-to-Image Generator</h2>
+    <form id="generate-form">
+        <input type="text" id="prompt" placeholder="Enter text description" required>
+        <button type="submit">Generate</button>
+    </form>
+
+    <p id="status"></p>
+    <img id="generated-image" src="" alt="Generated Image" style="display: none; max-width: 500px;">
+
+    <script>
+        document.getElementById("generate-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const prompt = document.getElementById("prompt").value;
+            const status = document.getElementById("status");
+            const image = document.getElementById("generated-image");
+
+            status.textContent = "Generating image, please wait...";
+            image.style.display = "none";
+
+            try {
+                const response = await fetch("/generate/", {
+                    method: "POST",
+                    body: new URLSearchParams({ prompt }),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    image.src = result.image_url;
+                    image.style.display = "block";
+                    status.textContent = "Image generated successfully!";
+                } else {
+                    status.textContent = "Error: " + result.error;
+                }
+            } catch (error) {
+                status.textContent = "Failed to generate image.";
+            }
+        });
+    </script>
+</body>
+</html>
